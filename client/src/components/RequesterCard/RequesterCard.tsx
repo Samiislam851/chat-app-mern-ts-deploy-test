@@ -31,7 +31,7 @@ const RequesterCard = ({ requester, dbUser, setDbUser, setRequesters, requesters
 
         try {
             setLoading(true)
-            const res = await axios.post(`http://localhost:3000/accept-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
+            const res = await axios.post(`/accept-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('chat-app')}`
                 }
@@ -66,7 +66,7 @@ const RequesterCard = ({ requester, dbUser, setDbUser, setRequesters, requesters
     const cancelRequest = async () => {
         try {
             setLoadingCancel(true)
-            const res = await axios.post(`http://localhost:3000/cancel-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
+            const res = await axios.post(`/cancel-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('chat-app')}`
                 }

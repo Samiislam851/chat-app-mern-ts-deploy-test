@@ -36,7 +36,7 @@ const navigate = useNavigate()
 
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/get-single-user?email=${otherUser}`, {
+        axios.get(`/get-single-user?email=${otherUser}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('chat-app')}`
             }

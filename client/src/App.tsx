@@ -19,6 +19,13 @@ type Props = {}
 
 const App = (props: Props) => {
 
+
+  // Create an instance of axios with a baseURL
+
+axios.defaults.baseURL = `${import.meta.env.PORT}`
+ 
+
+
   const router = createBrowserRouter([
     {
       path: '/',

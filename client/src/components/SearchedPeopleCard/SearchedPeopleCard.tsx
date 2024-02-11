@@ -26,7 +26,7 @@ const [loading, setLoading] = useState(false)
 
         try {
             setLoading(true)
-            const res = await axios.post(`http://localhost:3000/send-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
+            const res = await axios.post(`/send-request?user1email=${user?.email}&&user2email=${email}`, { user }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('chat-app')}`
                 }
@@ -56,7 +56,7 @@ const [loading, setLoading] = useState(false)
 
         try {
             setLoading(true)
-            const res = await axios.post(`http://localhost:3000/cancel-request-from-requester?user1email=${user?.email}&&user2email=${email}`, { user }, {
+            const res = await axios.post(`/cancel-request-from-requester?user1email=${user?.email}&&user2email=${email}`, { user }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('chat-app')}`
                 }

@@ -124,7 +124,7 @@ const [socket, setSocket] = useState<any>(null)
 // useEffect(() => {
 
 // if(user){
-//     const newSocket = io("http://localhost:3000/");
+//     const newSocket = io("/");
 
 //     newSocket.on('connect', () => {
     

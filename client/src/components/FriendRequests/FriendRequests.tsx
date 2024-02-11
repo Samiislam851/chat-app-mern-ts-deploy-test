@@ -31,7 +31,7 @@ const FriendRequests = (props: Props) => {
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
     useEffect(() => {
         setLoading(true)
-        axios.get(`http://localhost:3000/get-friend-requests?email=${user?.email}`, {
+        axios.get(`/get-friend-requests?email=${user?.email}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('chat-app')}`
             }

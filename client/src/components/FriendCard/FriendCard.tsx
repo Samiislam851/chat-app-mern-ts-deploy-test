@@ -28,7 +28,7 @@ const FriendCard = ({ friend, dbUser, setDbUser, setFriends, friends }: Props) =
 const navigate = useNavigate()
 
     const chat = () => {
-        axios.get(`http://localhost:3000/chat/${user?.email}--${email}`, { headers: { Authorization: `Bearer ${localStorage.getItem('chat-app')}` } }).then(res => {
+        axios.get(`/chat/${user?.email}--${email}`, { headers: { Authorization: `Bearer ${localStorage.getItem('chat-app')}` } }).then(res => {
             
 
         navigate(`/dashboard/chat/${res.data.chatId}`)

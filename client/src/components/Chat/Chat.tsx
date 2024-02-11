@@ -49,7 +49,7 @@ const Chat = (props: Props) => {
   useEffect(() => {
 
 
-    const newSocket = io("http://localhost:3000/");
+    const newSocket = io("/");
 
     newSocket.on('connect', () => {
       setSocketConnected(true)
@@ -73,7 +73,7 @@ const Chat = (props: Props) => {
 
   useEffect(() => {
     setLoading(true)
-    axios.get(`http://localhost:3000/messages/${chatId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('chat-app')}` } })
+    axios.get(`/messages/${chatId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('chat-app')}` } })
 
       .then(res => {
 
@@ -95,7 +95,7 @@ const Chat = (props: Props) => {
     const secondUsersMessage = messages?.find(chatUser => chatUser?.sender != user?.email)
     const user2Email = secondUsersMessage?.sender
 
-    axios.get(`http://localhost:3000/get-single-user?email=${user2Email}`, {
+    axios.get(`/get-single-user?email=${user2Email}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('chat-app')}`
       }
@@ -117,7 +117,7 @@ const Chat = (props: Props) => {
     try {
 
       const res = await axios.post(
-        `http://localhost:3000/send-message/${chatId}`,
+        `/send-message/${chatId}`,
         {
           message: data.message,
           sender: user?.email

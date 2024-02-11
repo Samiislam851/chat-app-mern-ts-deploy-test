@@ -49,7 +49,7 @@ console.log('dbUser ::::::::::::', dbUser);
         console.log('from save user to db', user);
 
         try {
-            const res = await axios.post('http://localhost:3000/saveUser', user);
+            const res = await axios.post('/saveUser', user);
 
             if (res.status === 200) {
                 setDbUser(res.data.user)

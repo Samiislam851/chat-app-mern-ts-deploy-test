@@ -32,7 +32,7 @@ const SentRequests = (props: Props) => {
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
     useEffect(() => {
         setLoading(true)
-        axios.get(`http://localhost:3000/get-sent-requests?email=${user?.email}`, {
+        axios.get(`/get-sent-requests?email=${user?.email}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('chat-app')}`
             }

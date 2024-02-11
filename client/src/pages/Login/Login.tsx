@@ -49,7 +49,7 @@ export default function page({ }: Props) {
     // save user to DB
 
     try {
-      const res = await axios.post('http://localhost:3000/login', user)
+      const res = await axios.post('/login', user)
 
       if (res.status == 200) {
 

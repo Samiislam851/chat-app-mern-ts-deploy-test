@@ -42,7 +42,7 @@ const AddFriend = (props: Props) => {
         } else {
 
             setLoading(true)
-            axios.post('http://localhost:3000/search-user',
+            axios.post('/search-user',
                 { inputValue, user },
                 {
                     headers: {
@@ -76,7 +76,7 @@ const AddFriend = (props: Props) => {
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
     useEffect(() => {
 
-        axios.get(`http://localhost:3000/get-single-user?email=${user?.email}`, {
+        axios.get(`/get-single-user?email=${user?.email}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('chat-app')}`
             }

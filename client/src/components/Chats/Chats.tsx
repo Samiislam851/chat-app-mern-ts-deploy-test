@@ -31,7 +31,7 @@ const Chats = (props: Props) => {
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
     useEffect(() => {
         setLoading(true)
-        axios.get(`http://localhost:3000/get-chats?email=${user?.email}`, {
+        axios.get(`/get-chats?email=${user?.email}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('chat-app')}`
             }
