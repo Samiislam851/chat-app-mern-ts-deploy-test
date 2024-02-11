@@ -29,7 +29,7 @@ axios.defaults.baseURL = `${import.meta.env.PORT}`
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Navigate to='/login' />,
+      element: <RestrictedPublicRoute><Login/></RestrictedPublicRoute>  ,
       errorElement: <NotFoundPage/>,
 
     },
