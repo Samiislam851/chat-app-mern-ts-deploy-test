@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import ContextProvider from './Configs/ContextProvider.tsx'
-import SocketContextProvider from './Configs/SocketContextprovider.tsx'
+import SocketContextProvider from './Configs/SocketContextProvider.tsx'
 
 
 
