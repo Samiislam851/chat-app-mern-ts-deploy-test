@@ -1,12 +1,6 @@
 # Chat App - React - Typescript - Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
+Welcome to the Chitchatz  App, built with React, Typescript, and Vite. This application provides a modern and efficient platform for real-time communication with your friends. With features like account management, user search, friend requests, and realtime notifications, the Chat App offers a seamless experience for staying connected with your social circle. 
 
 
 # Features:
@@ -17,7 +11,7 @@ Currently, two official plugins are available:
 - **Real-time Chat:** Users can start new chats in real-time with their friends.
 - **One-to-One Chat:** Users can engage in one-to-one chat conversations with their friends.
 - **Security with JWT:** JSON Web Tokens (JWT) are implemented for secure user authentication and authorization.
-- **User-friendly UI:** The user interface is designed to be intuitive and easy to understand.
+- **Beautiful User-friendly UI:** The user interface is designed to be intuitive and easy to understand.
 - **Friend List and Chat List:** Users can view their friend list and ongoing chat conversations for easy access.
 
 
@@ -27,12 +21,40 @@ Currently, two official plugins are available:
 Follow these steps to run the Chat App locally on your machine:
 
 1. **Clone the Repository:**
+
+  ````
+  git clone https://github.com/your-username/chat-app.git
+ 
+  ````
 2. **Navigate to the Project Directory:**
-3. **Install Dependencies:**
-4. **Start the Development Server:**
-5. **Also download the server side repo from my repositories to use it**
-6. **Open the Application in Your Browser:**
+
+```` 
+cd chat-app-MERN-ts
+````
+
+3. **Add .env credentials :**
+
+````
+Add firebase app credentials
+Don't forget to set it up for emailSignIn authentication
+````
+4. **Install Dependencies:**
+````
+npm install 
+````
+5. **Start the Development Server:**
+````
+npm run dev
+````
+6. **Also download the server side repo from my repositories to use it**
+7. **Open the Application in Your Browser and enjoy**
 
 
 
+## Technologies Used
 
+- **React.js**: JavaScript Library.
+- **Tailwind**: CSS library to develope better UI faster with more flexibility.
+- **JSON Web Tokens (JWT)**: Used for user authentication and authorization use local storage for ease.
+- **socket.io-client**: Used for realtime communication and notification updates
+- **Other libraries**: React-router , Axios, react-hook-form, react-icons, sweet-alert, react-hot-toast.

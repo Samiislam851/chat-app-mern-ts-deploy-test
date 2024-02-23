@@ -1,7 +1,8 @@
 const express = require('express')
 
-const cors = require('cors')
+const cors = require('cors');
 require('dotenv').config();
+
 const app = express()
 const db = require('./config/db');
 
@@ -29,7 +30,7 @@ app.use(express.json())
 
 
 
-const server = app.listen( process.env.PORT || 3000, () => {
+const server = app.listen(process.env.PORT || 3000, () => {
     console.log('example listening to port', 3000);
 })
 const io = require('socket.io')(server, {
@@ -50,45 +51,32 @@ const io = require('socket.io')(server, {
 
 
 ///////////////// socket //////////////
-const connectedUsers = new Set();
+const connectedUsers = {};
 
 io.on('connection', (socket) => {
 
-    console.log('socket connected');
 
 
-    socket.on('setup', (user) => {
+    connectedUsers[socket.handshake.query.user] = socket.id
 
-        socket.join(user?.email);
-        console.log('Connected to setup, user is:', user?.email);
-        socket.emit('emitting connected');
 
-    })
 
-    socket.on('join-chat', (room) => {
-        socket.join(room);
-        console.log("user joined room " + room);
-    })
+    console.log('socket connected', socket.handshake.query.user, '==', socket.id, '\n users', connectedUsers);
+    let onlineUsers = Object.keys(connectedUsers)
 
-    // socket.on('join-chat', (room) => {
-    //     if (!connectedUsers.has(room)) {
-    //         connectedUsers.add(room);
-    //         socket.join(room);
-    //         console.log("User joined room: " + room);
-    //     }
-    // });
-
+    console.log('Before emit line user : ', onlineUsers);
+    io.emit('getOnlineUsers', onlineUsers)
+    console.log('After emit line user : ', onlineUsers);
 
     socket.on('disconnect', () => {
+        delete connectedUsers[socket.handshake.query.user]
 
-        // Leave all rooms the socket is currently joined
-        Object.keys(socket.rooms).forEach(room => {
-            socket.leave(room);
-            console.log(`Socket left room: ${room}`);
-        });
+        let onlineUsers = Object.keys(connectedUsers)
+        io.emit('getOnlineUsers', onlineUsers)
 
-        console.log('disconnected from socket');
+        console.log('disconnected from socket', socket.handshake.query.user, '==', socket.id, 'connected', connectedUsers);
     })
+
 
     socket.on('new-message', (newMessageAndChat) => {
         let chat = newMessageAndChat.chat;
@@ -103,33 +91,56 @@ io.on('connection', (socket) => {
 
         chatUsers.forEach((user) => {
             if (user == newMessageAndChat.message.sender) return
-
             console.log('user.email', user);
-
-            socket.in(user).emit("message-received", newMessageAndChat.message)
-
+            if (connectedUsers[user]) {
+                console.log('connectedUsers  user', connectedUsers[user], '==', user, "\n message", newMessageAndChat.message);
+                io.to(connectedUsers[user]).emit("message-received", newMessageAndChat)
+            }
         })
     })
+
+
+
+    socket.on('typing emit', (data) => {
+        const { user1, user2 } = data
+        console.log('typing started');
+        const resData = { user: user1, typing: true }
+        io.to(connectedUsers[user2]).emit('typing', resData)
+    })
+    socket.on('typing stopped', (data) => {
+        const { user1, user2 } = data
+        const resData = { user: user1, typing: false }
+        console.log('typing stopped');
+        io.to(connectedUsers[user2]).emit('typing stopped', resData)
+    })
+
+
+    socket.on('request accepted', (data) => {
+        const { user1, user1name, user2Email } = data
+        const user = { name: user1name, email: user1 }
+        io.to(connectedUsers[user2Email]).emit('request accepted res', user)
+    })
+
+
+
+    socket.on('send request', (data) => {
+        const { user1name, user1Email, user2Email } = data
+        const user = { name: user1name, email: user1Email }
+
+        console.log('from socket user that accepted => ', user, user2Email);
+        io.to(connectedUsers[user2Email]).emit('send request res', user)
+        console.log('sent >>>>>>>>>>>>>>>>> from socket user that accepted => ', user, user2Email);
+    })
+
 
     socket.on("typing", (room) => socket.in(room).emit("typing"));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing"))
 })
 
-//// checking db connection
-// db.on('connected', () => {
-//     console.log('connected msg from index');
-// })
-
-// db.on('disconnect', () => {
-//     console.log('disconnected');
-// })
 
 
-app.get('/', async (req, res) => {
 
-    res.status(200).json({ message: 'hello world' })
 
-})
 
 /// register user///
 
@@ -444,11 +455,11 @@ app.get('/get-friends', verifyJWT, async (req, res) => {
 //////// get-Chats
 app.get('/get-chats', verifyJWT, async (req, res) => {
 
-    const decoded = req.decoded
+
 
     const userEmail = req.query.email
 
-
+    let usersTemp = []
     try {
         const user = await User.findOne({
             email: userEmail
@@ -459,13 +470,41 @@ app.get('/get-chats', verifyJWT, async (req, res) => {
         // Find users whose email addresses are in the friends array
         const chats = await Chats.find({ _id: { $in: chatIds } })
 
-        res.status(200).json({ chats, success: true })
+        chats.forEach(chat => usersTemp.push(...chat.users))
+
+        // console.log(usersTemp);
+
+        const userEmails = usersTemp.filter(user => user !== userEmail)
+
+        const chatUsers = await User.find({ email: { $in: userEmails } }).select('name email photoURL chats')
+        // console.log(chatUsers);
+
+        const chatsFinal = chats.map(chat => {
+
+            for (let i = 0; i < chatUsers.length; i++) {
+                if (chatUsers[i].chats.includes(chat._id)) {
+                    const obj = {
+                        userId: chatUsers[i]._id,
+                        name: chatUsers[i].name,
+                        email: chatUsers[i].email,
+                        photoURL: chatUsers[i].photoURL,
+                        chat
+                    }
+                    return obj
+                }
+            }
+        })
+
+        res.status(200).json({ chatsFinal, success: true })
+        return
 
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, message: 'server error' })
+        return
     }
 })
+
 //////// get-sent-requests
 app.get('/get-sent-requests', verifyJWT, async (req, res) => {
 
@@ -569,7 +608,12 @@ app.get('/chat/:ids', verifyJWT, async (req, res) => {
             console.log('chat is null creating new chat');
             const newChat = new Chats({
                 users: userEmails,
-                chatName: ""
+                chatName: "",
+                lastMessage: {
+                    sender: usersString.split('--')[0],
+                    content: 'no conversation yet',
+                    timeStamp: new Date()
+                }
             })
 
             chat = await newChat.save()
@@ -610,7 +654,13 @@ app.post('/send-message/:chatId', verifyJWT, async (req, res) => {
     // console.log('ChatId', chatId, 'sender', sender);
     try {
         // Check if a chat exists for the given users
-        let chat = await Chats.findOne({ _id: chatId });
+        let chat = await Chats.findOneAndUpdate({ _id: chatId }, {
+            lastMessage: {
+                sender: sender,
+                content: messageContent,
+                timeStamp: new Date()
+            }
+        });
 
         // If chat doesn't exist, create a new one
         if (!chat) {
@@ -630,7 +680,7 @@ app.post('/send-message/:chatId', verifyJWT, async (req, res) => {
         const messageResponse = await newMessage.save();
         // console.log('messageResponse', messageResponse);
 
-        // Send response
+        // Send response 
         res.send({ message: 'Message saved', messageResponse });
     } catch (error) {
         console.error(error);
@@ -641,16 +691,20 @@ app.post('/send-message/:chatId', verifyJWT, async (req, res) => {
 
 
 
-/////////////// get messages /////////////
+/////////////// get-messages /////////////
 
 app.get('/messages/:chatId', verifyJWT, async (req, res) => {
     const chatId = req.params.chatId;
-    // console.log('chatId::::::::;', chatId);
     try {
-        let messages = await Messages.find({ chatId: chatId });
+        const chat = await Chats.findOne({ _id: chatId })
+        const userEmails = chat.users
 
-        // console.log('messages:::', messages);
-        res.status(200).json(messages);
+        const users = await User.find({ email: { $in: userEmails } }, "email name photoURL")
+
+
+        const messages = await Messages.find({ chatId: chatId });
+
+        res.status(200).json({ messages, users });
     } catch (error) {
         console.error('Error retrieving messages:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -665,7 +719,7 @@ if (true) {
     // console.log( path.join(__dirname2, "/client/dist"));
     app.use(express.static(path.join(__dirname2, "/client/dist")))
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname2,"client","dist","index.html"))
+        res.sendFile(path.join(__dirname2, "client", "dist", "index.html"))
     })
 } else {
     app.get('/', (req, res) => {

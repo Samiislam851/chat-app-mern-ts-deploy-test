@@ -22,7 +22,7 @@ const FriendRequests = (props: Props) => {
     const { user, logOut } = useContext(Context)!
     const [loading, setLoading] = useState<boolean>(false)
 
-    const [requesters, setRequesters] = useState<MongoUser[] | null>(null)
+    const [requesters, setRequesters] = useState<MongoUser[] >([])
 
 
 
@@ -47,6 +47,9 @@ const FriendRequests = (props: Props) => {
 
                 setLoading(false)
                 console.log(err)
+                if (err.response.status === 401) {
+                    logOut()
+                }
             }
             )
 
@@ -58,7 +61,7 @@ const FriendRequests = (props: Props) => {
 
 
     return (
-        <div className='py-20'>
+        <div className='py-20 px-2'>
 
 
 
@@ -73,21 +76,22 @@ const FriendRequests = (props: Props) => {
 
 
                 <div className='max-w-md  mx-auto'>
-
-                    <h3 className='text-sm text-[#81689D] pb-1'>Incoming Requests: </h3>
+                    <h3 className='text-sm text-[#FFFFFF] pb-1'>Incoming Requests: </h3>
                     <div className='border-t pt-0'>
 
-                        {!requesters ? <div className='text-xl text-center py-10 text-gray-500'>
+                        {requesters.length == 0 ? <div className='text-xl text-center py-10 text-gray-500'>
                             No incoming requests
-                        </div> :<></>}
-                            <ul className='list-none '>
-                                {
-                                    /////////////////// create an array of requested users then show them here
+                        </div> : <>
 
-                                    requesters?.map((requester: MongoUser, i: number) => <RequesterCard key={i} dbUser={dbUser} setDbUser={setDbUser} requesters={requesters} setRequesters={setRequesters} requester={requester} />)
-                                }
+                        </>}
+                        <ul className='list-none '>
+                            {
+                                /////////////////// create an array of requested users then show them here
 
-                            </ul>
+                                requesters?.map((requester: MongoUser, i: number) => <RequesterCard key={i} dbUser={dbUser} setDbUser={setDbUser} requesters={requesters} setRequesters={setRequesters} requester={requester} />)
+                            }
+
+                        </ul>
                     </div>
                 </div>
 

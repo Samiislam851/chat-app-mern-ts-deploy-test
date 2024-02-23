@@ -31,25 +31,31 @@ const Friends = (props: Props) => {
     // console.log(searchedUsers);
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
     useEffect(() => {
-        setLoading(true)
-        axios.get(`/get-friends?email=${user?.email}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('chat-app')}`
-            }
-        })
-            .then(res => {
 
-
-                setFriends(res.data.users)
-                setLoading(false)
-
+        if (user) {
+            setLoading(true)
+            axios.get(`/get-friends?email=${user?.email}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('chat-app')}`
+                }
             })
-            .catch(err => {
+                .then(res => {
 
-                setLoading(false)
-                console.log(err)
-            }
-            )
+
+                    setFriends(res.data.users)
+                    setLoading(false)
+
+                })
+                .catch(err => {
+
+                    setLoading(false)
+                    console.log(err)
+                    if (err.response.status === 401) {
+                        logOut()
+                    }
+                }
+                )
+        }
 
     }, [])
 
@@ -59,7 +65,7 @@ const Friends = (props: Props) => {
 
 
     return (
-        <div className='py-20'>
+        <div className='py-20 px-2'>
 
 
 
@@ -75,8 +81,8 @@ const Friends = (props: Props) => {
 
                 <div className='max-w-md  mx-auto'>
 
-                    <h3 className='text-xl text-[#81689D] pb-1 '>Friends </h3>
-                    <div className='border-t pt-0 '>
+                    <h3 className='text-xl text-[#FFFFFF] pb-1'>Friends </h3>
+                    <div className='border-t pt-2  '>
 
 
                         {

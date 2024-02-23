@@ -4,7 +4,8 @@ const { Schema } = mongoose
 
 const chatSchema = new Schema({
     users: [String],
-    chatName: String
+    chatName: String,
+    lastMessage : Object
 })
 
 const Chats = mongoose.model('chats', chatSchema)

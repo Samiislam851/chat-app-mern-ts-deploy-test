@@ -11,12 +11,12 @@ type Props = {
 const PrivateRoute = ({ children }: Props) => {
 
     const { user, loading } = useContext(Context)!
-    if (!loading) {
+    if (!loading ) {
         return (
             <> {!user ? <Navigate to='/login' /> : <>{children}</>}</>
         )
     }
-    return <> <div className='w-screen my-40'> <AiOutlineLoading3Quarters className='text-5xl text-center animate-spin mx-auto' />
+    else return <> <div className='w-screen my-40'> <AiOutlineLoading3Quarters className='text-5xl text-center animate-spin mx-auto' />
     
     
     </div></>

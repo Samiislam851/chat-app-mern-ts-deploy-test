@@ -4,7 +4,8 @@ import { GoogleAuthProvider, createUserWithEmailAndPassword, getAuth, onAuthStat
 import { UserCredential } from "firebase/auth";
 import { MongoUser, User } from '../types/types';
 import app from '../utils/firebase';
-import io from 'socket.io-client'
+import io, { Socket } from 'socket.io-client'
+import axios from 'axios';
 //////////////// interfaces and types ////////////////////////
 type Props = {
     children: ReactNode
@@ -24,9 +25,12 @@ export interface valueType {
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
     dbUser: MongoUser | null,
     setDbUser: React.Dispatch<React.SetStateAction<MongoUser | null>>,
-    notification : any,
+    notification: any,
     setNotification: React.Dispatch<any>,
-    socket : any
+    requests: object[] | null,
+    setRequests: React.Dispatch<React.SetStateAction<object[] | null>>,
+    setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>,
+    loggedIn: boolean
 }
 
 
@@ -43,10 +47,10 @@ export const Context = createContext<valueType | null>(null)
 export default function ContextProvider({ children }: Props) {
 
     const [first, setFirst] = useState<boolean>(true)
-    const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
     const [user, setUser] = useState<User | null>(null)
     const [dbUser, setDbUser] = useState<MongoUser | null>(null)
-
+    const [loggedIn, setLoggedIn] = useState<boolean>(false)
 
     ////////////////////  firebase features initialization ///////////////
     const googleProvider = new GoogleAuthProvider();
@@ -60,22 +64,7 @@ export default function ContextProvider({ children }: Props) {
 
 
 
-    useEffect(() => {
-        const unsubscribe = () => {
-            onAuthStateChanged(auth, (loggedUser: User | null) => {
-                setUser(loggedUser)
-                setLoading(false)
-            })
-        }
-        // const currentUser = auth.currentUser;
-        // if (currentUser) {
-        //     setUser(currentUser);
-        // }
 
-        return () => {
-            unsubscribe()
-        }
-    }, [])
 
 
 
@@ -110,38 +99,72 @@ export default function ContextProvider({ children }: Props) {
     }
 
 
-const [notification, setNotification] = useState<any>([])
+    const [notification, setNotification] = useState<any>([])
 
 
 
-useEffect(() => {
-    console.log(notification);
-}, [notification])
+    useEffect(() => {
+        console.log(notification);
+    }, [notification])
 
-//////////////////////////  socket connection /////////////
-const [socket, setSocket] = useState<any>(null)
 
-// useEffect(() => {
 
-// if(user){
-//     const newSocket = io("/");
 
-//     newSocket.on('connect', () => {
+
+    ///// friend requests ///
+
+    const [requests, setRequests] = useState<object[] | null>([])
+
+    useEffect(() => {
+
+        if (user && loggedIn) {
+
+            console.log('user email', user.email);
+
+
+            axios.get(`/get-friend-requests?email=${user?.email}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('chat-app')}`
+                }
+            })
+                .then(res => {
+                    setRequests(res.data.users)
+                })
+                .catch(err => {
+
+
+                    console.log(err)
+                    if (err.response.status === 401) {
+                        logOut()
+                    }
+                }
+                )
+        }
+
+
+    }, [user])
+
+
+    useEffect(() => {
+     
+        console.log('outside auth state changed unsubscribe');
+        const unsubscribe = onAuthStateChanged(auth, (loggedUser: User | null) => {
+            setUser(loggedUser)
+            console.log('on auth state changed func user:', loggedUser);
+            setLoading(false)
+          });
+          
+        console.log('user ::: after onAuthStateChanged', user);
+        
+      return () => {
+        console.log('unsubscribing');
+        unsubscribe()
+      }
+    }, [])
+
+
+
     
-//       setSocket(newSocket)
-
-
-//       console.log('Connected to socket server');
-//     }
-//     )
-//     newSocket.emit('setup', user);
-
-// }
-    
-//     return () => {
-//       // newSocket.disconnect();
-//     };
-//   }, [user]);
 
 
 
@@ -149,38 +172,35 @@ const [socket, setSocket] = useState<any>(null)
 
 
 
+    // for production  error  using local storage for saving the user credentials
 
-//   useEffect(() => {
-//     socket?.on('message-received', (newMessageReceived: any) => {
-//       if (chatId !== newMessageReceived.chatId) {
-//         Swal.fire({
-//           position: "top-end",
-//           icon: "info",
-//           title: `${newMessageReceived.sender.split('@')[0]} sent you a message`,
-//           text:`${newMessageReceived.content}....`,
-//           showConfirmButton: false,
-//           timer: 2000
-//         });
-//       } else {
-//         setMessages(prevMessages => [...prevMessages, newMessageReceived]);
-//       }
-//     });
-//   }, [socket]);
+    // useEffect(() => {
+    //     const storedUserCred = localStorage.getItem('userCred');
 
 
 
+    //     if (storedUserCred !== null) {
+    //         const userCred = JSON.parse(storedUserCred);
+    //         const { email, pass } = userCred!
+    //         emailSignIn(email, pass)
 
+    //     } else {
+    //         // Handle the case where 'userCred' is not found in localStorage
+    //     }
 
+    //     return () => {
+        
+    //     }
+    // }, [])
 
 
 
 
-
-
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
     const value: valueType = {
-        first, setFirst, googleLogin,  logOut,
-        loading, setLoading, emailRegister, emailSignIn, addUserDetails,user, setUser, dbUser, setDbUser,setNotification,notification,  socket }
+        first, setFirst, googleLogin, logOut,
+        loading, setLoading, emailRegister, emailSignIn, addUserDetails, user, setUser, dbUser, setDbUser, setNotification, notification, requests, setRequests, setLoggedIn, loggedIn
+    }
 
     return (
         <Context.Provider value={value}>
