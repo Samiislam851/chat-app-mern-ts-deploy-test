@@ -1,4 +1,4 @@
-'use client'
+
 import React, { useContext, useState } from 'react'
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
